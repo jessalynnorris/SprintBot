@@ -1,3 +1,4 @@
+from keep_alive import keep_alive
 import discord
 from discord.ext import commands, tasks
 from discord import app_commands
@@ -170,5 +171,7 @@ class FinalWordModal(discord.ui.Modal, title="Enter Final Word Count"):
             f"{self.user.mention} has submitted a final count of {final:,}. The full board will be displayed in 90 seconds.",
             ephemeral=False
         )
+
+keep_alive()
 
 bot.run(TOKEN)
