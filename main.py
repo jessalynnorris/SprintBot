@@ -34,15 +34,15 @@ async def sprintstart(interaction: discord.Interaction):
     self.sprint_data.clear()
     await interaction.response.send_modal(SprintLengthModal())
 
-            class SprintLengthModal(discord.ui.Modal, title="Set Sprint Length"):
-                def __init__(modal_self):
-                    super().__init__()
-                    modal_self.minutes = discord.ui.TextInput(
-                        label="Sprint length (in minutes)",
-                        placeholder="e.g., 15",
-                        required=True
-                    )
-                    modal_self.add_item(modal_self.minutes)
+class SprintLengthModal(discord.ui.Modal, title="Set Sprint Length"):
+    def __init__(self):
+        super().__init__()
+        self.minutes = discord.ui.TextInput(
+            label="Sprint length (in minutes)",
+            placeholder="e.g., 15",
+            required=True
+        )
+        self.add_item(self.minutes)
 
                 async def on_submit(modal_self, interaction2: discord.Interaction):
                     try:
