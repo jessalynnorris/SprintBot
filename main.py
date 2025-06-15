@@ -202,10 +202,6 @@ now = asyncio.get_event_loop().time()
 time_elapsed = int(now - self.bot.sprint_data.get("sprint_end_time", now))
 seconds_left = max(0, 90 - time_elapsed)
 
-        now = asyncio.get_event_loop().time()
-        time_elapsed = int(now - self.bot.sprint_data.get("sprint_end_time", now))
-        seconds_left = max(0, 90 - time_elapsed)
-
         await interaction.response.send_message(
             f"{self.user.mention} has submitted a final count of {final:,}. The full board will be displayed in {seconds_left} seconds.",
             ephemeral=False
