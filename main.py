@@ -29,66 +29,63 @@ class SprintBot(commands.Bot):
             "Incredible. Your invisibility spell worked perfectly."
         ]
 
-@self.tree.command(name="sprintstart", description="Start a writing sprint")
-async def sprintstart(interaction: discord.Interaction):
-    self.sprint_data.clear()
-    await interaction.response.send_modal(SprintLengthModal())
+        @self.tree.command(name="sprintstart", description="Start a writing sprint")
+        async def sprintstart(interaction: discord.Interaction):
+            self.sprint_data.clear()
 
-class SprintLengthModal(discord.ui.Modal, title="Set Sprint Length"):
-    def __init__(self):
-        super().__init__()
-        self.minutes = discord.ui.TextInput(
-            label="Sprint length (in minutes)",
-            placeholder="e.g., 15",
-            required=True
-        )
-        self.add_item(self.minutes)
+            class SprintLengthModal(discord.ui.Modal, title="Set Sprint Length"):
+                def __init__(modal_self):
+                    super().__init__()
+                    modal_self.minutes = discord.ui.TextInput(
+                        label="Sprint length (in minutes)",
+                        placeholder="e.g., 15",
+                        required=True
+                    )
+                    modal_self.add_item(modal_self.minutes)
 
-    async def on_submit(modal_self, interaction2: discord.Interaction):
-        try:
-            sprint_minutes = int(modal_self.minutes.value)
-        except ValueError:
-            await interaction2.response.send_message("Please enter a valid number.", ephemeral=True)
-            return
+                async def on_submit(modal_self, interaction2: discord.Interaction):
+                    try:
+                        sprint_minutes = int(modal_self.minutes.value)
+                    except ValueError:
+                        await interaction2.response.send_message("Please enter a valid number.", ephemeral=True)
+                        return
 
+                    await interaction2.response.send_message(
+                        "🪶 Your quills should be poised before the timer starts ticking. Join now and submit your starting word count. You have exactly 3 minutes before we begin.",
+                        ephemeral=False
+                    )
 
-        await interaction2.response.send_message(
-            "🪶 Your quills should be poised before the timer starts ticking. Join now and submit your starting word count. You have exactly 3 minutes before we begin.",
-            ephemeral=False
-        )
+                    view = StartView(self)
+                    message = await interaction.followup.send(
+                        "Click below to join and input your starting word count:", view=view
+                    )
 
-        view = StartView(self)
-        message = await interaction.followup.send(
-            "Click below to join and input your starting word count:", view=view
-        )
+                    await asyncio.sleep(180)
+                    view.disable_all()
+                    await message.edit(view=view)
 
-        await asyncio.sleep(180)
-        view.disable_all()
-        await message.edit(view=view)
+                    await interaction2.followup.send(
+                        f"⏰ Sprint begins now. Impress me, if you think you can.\n({sprint_minutes} minutes on the clock.)"
+                    )
 
-        await interaction2.followup.send(
-            f"⏰ Sprint begins now. Impress me, if you think you can.\n({sprint_minutes} minutes on the clock.)"
-        )
+                    for remaining in range(sprint_minutes * 60, 0, -60):
+                        await asyncio.sleep(60)
 
-        for remaining in range(sprint_minutes * 60, 0, -60):
-            await asyncio.sleep(60)
+                    await interaction2.followup.send("🛎️ Time’s up! Quills down — it’s time to see what you achieved.")
 
-        await interaction2.followup.send("🛎️ Time’s up! Quills down — it’s time to see what you achieved.")
+                    final_view = FinalCountView(self)
+                    message2 = await interaction.followup.send(
+                        "Click to log your final word count below:", view=final_view
+                    )
 
-        final_view = FinalCountView(self)
-        message2 = await interaction.followup.send(
-            "Click to log your final word count below:", view=final_view
-        )
+                    await asyncio.sleep(90)
+                    final_view.disable_all()
+                    await message2.edit(view=final_view)
 
-        await asyncio.sleep(90)
-        final_view.disable_all()
-        await message2.edit(view=final_view)
+                    await self.send_results(interaction2)
 
-        await self.send_results(interaction2)
+            await interaction.respon
 
-    await interaction.response.send_modal(SprintLengthModal())
-
-    async def send_results(self, interaction):
         results = []
         non_submitters = []
 
