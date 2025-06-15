@@ -51,7 +51,7 @@ class SprintBot(commands.Bot):
         except Exception as e:
             print(f"Error syncing commands: {e}")
                 
-                async def on_submit(modal_self, interaction2: discord.Interaction):
+        async def on_submit(modal_self, interaction2: discord.Interaction):
                     try:
                         sprint_minutes = int(modal_self.minutes.value)
                     except ValueError:
