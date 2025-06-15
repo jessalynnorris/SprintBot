@@ -58,15 +58,14 @@ class SprintBot(commands.Bot):
                     )
 
                     view = StartView(self)
-                    sprint_message = await interaction2.followup.send(
-                        "Click below to join and input your starting word count:", 
-                        view=view
-                    )
+message = await interaction.followup.send(
+    "Click below to join and input your starting word count:", view=view
+)
 
-                    await asyncio.sleep(180)
+await asyncio.sleep(180)
+view.disable_all()
+await message.edit(view=view)
 
-                    view.disable_all()
-                    await sprint_message.edit(view=None)
 
                     await interaction2.followup.send(
                         f"⏰ Sprint begins now. Impress me, if you think you can.\n({sprint_minutes} minutes on the clock.)"
@@ -78,13 +77,14 @@ class SprintBot(commands.Bot):
                     await interaction2.followup.send("🛎️ Time’s up! Quills down — it’s time to see what you achieved.")
 
                     final_view = FinalCountView(self)
-                    final_message = await interaction2.followup.send(
-                        "Click to log your final word count below:", view=final_view
-                    )
+message2 = await interaction.followup.send(
+    "Click to log your final word count below:", view=final_view
+)
 
-                    await asyncio.sleep(90)
-                    final_view.disable_all()
-                    await final_message.edit(view=None)
+await asyncio.sleep(90)
+final_view.disable_all()
+await message2.edit(view=final_view)
+
                     await self.send_results(interaction2)
 
             await interaction.response.send_modal(SprintLengthModal())
