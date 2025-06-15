@@ -1,6 +1,5 @@
 import discord
-from discord.ext import commands, tasks
-from discord import app_commands
+from discord.ext import commands
 import asyncio
 import os
 import random
@@ -85,25 +84,27 @@ class SprintBot(commands.Bot):
 
                     await self.send_results(interaction2)
 
-        async def send_results(self, interaction):
-            results = []
-            non_submitters = []
+            await interaction.response.send_modal(SprintLengthModal())
 
-            for user_id, data in self.sprint_data.items():
-                if "final" in data:
-                    results.append((data["user"], data["final"] - data["start"]))
-                else:
-                    non_submitters.append(data["user"])
+    async def send_results(self, interaction):
+        results = []
+        non_submitters = []
 
-            results.sort(key=lambda x: x[1], reverse=True)
+        for user_id, data in self.sprint_data.items():
+            if "final" in data:
+                results.append((data["user"], data["final"] - data["start"]))
+            else:
+                non_submitters.append(data["user"])
 
-            lines = [f"**{user.mention}**: {words} words" for user, words in results]
-            for user in non_submitters:
-                roast = random.choice(self.roasts)
-                lines.append(f"**{user.mention}**: didn’t bother submitting. {roast}")
+        results.sort(key=lambda x: x[1], reverse=True)
 
-            board = "\n".join(lines)
-            await interaction.followup.send(f"🏆 Final Rankings:\n{board}")
+        lines = [f"**{user.mention}**: {words} words" for user, words in results]
+        for user in non_submitters:
+            roast = random.choice(self.roasts)
+            lines.append(f"**{user.mention}**: didn’t bother submitting. {roast}")
+
+        board = "\n".join(lines)
+        await interaction.followup.send(f"🏆 Final Rankings:\n{board}")
 
 bot = SprintBot()
 
@@ -205,20 +206,5 @@ async def on_ready():
         print(f"Synced {len(synced)} command(s)")
     except Exception as e:
         print(f"Error syncing commands: {e}")
-
-class SprintLengthModal(discord.ui.Modal, title="Set Sprint Length"):
-    def __init__(self):
-        super().__init__()
-        self.minutes = discord.ui.TextInput(
-            label="Sprint length (in minutes)",
-            placeholder="e.g., 15",
-            required=True
-        )
-        self.add_item(self.minutes)
-
-    async def on_submit(self, interaction: discord.Interaction):
-        await interaction.response.send_message(
-            f"You chose {self.minutes.value} minutes!", ephemeral=True
-        )
 
 bot.run(TOKEN)
