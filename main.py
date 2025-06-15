@@ -29,10 +29,10 @@ class SprintBot(commands.Bot):
             "Incredible. Your invisibility spell worked perfectly."
         ]
 
-    async def setup_hook(self):
-        @self.tree.command(name="sprintstart", description="Start a writing sprint")
-        async def sprintstart(interaction: discord.Interaction):
-            self.sprint_data.clear()
+@self.tree.command(name="sprintstart", description="Start a writing sprint")
+async def sprintstart(interaction: discord.Interaction):
+    self.sprint_data.clear()
+    await interaction.response.send_modal(SprintLengthModal())
 
             class SprintLengthModal(discord.ui.Modal, title="Set Sprint Length"):
                 def __init__(modal_self):
@@ -207,5 +207,20 @@ async def on_ready():
         print(f"Synced {len(synced)} command(s)")
     except Exception as e:
         print(f"Error syncing commands: {e}")
+
+class SprintLengthModal(discord.ui.Modal, title="Set Sprint Length"):
+    def __init__(self):
+        super().__init__()
+        self.minutes = discord.ui.TextInput(
+            label="Sprint length (in minutes)",
+            placeholder="e.g., 15",
+            required=True
+        )
+        self.add_item(self.minutes)
+
+    async def on_submit(self, interaction: discord.Interaction):
+        await interaction.response.send_message(
+            f"You chose {self.minutes.value} minutes!", ephemeral=True
+        )
 
 bot.run(TOKEN)
