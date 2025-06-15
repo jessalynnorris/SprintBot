@@ -84,26 +84,25 @@ class SprintBot(commands.Bot):
 
                     await self.send_results(interaction2)
 
-            await interaction.respon
+        async def send_results(self, interaction):
+            results = []
+            non_submitters = []
 
-        results = []
-        non_submitters = []
+            for user_id, data in self.sprint_data.items():
+                if "final" in data:
+                    results.append((data["user"], data["final"] - data["start"]))
+                else:
+                    non_submitters.append(data["user"])
 
-        for user_id, data in self.sprint_data.items():
-            if "final" in data:
-                results.append((data["user"], data["final"] - data["start"]))
-            else:
-                non_submitters.append(data["user"])
+            results.sort(key=lambda x: x[1], reverse=True)
 
-        results.sort(key=lambda x: x[1], reverse=True)
+            lines = [f"**{user.mention}**: {words} words" for user, words in results]
+            for user in non_submitters:
+                roast = random.choice(self.roasts)
+                lines.append(f"**{user.mention}**: didn’t bother submitting. {roast}")
 
-        lines = [f"**{user.mention}**: {words} words" for user, words in results]
-        for user in non_submitters:
-            roast = random.choice(self.roasts)
-            lines.append(f"**{user.mention}**: didn’t bother submitting. {roast}")
-
-        board = "\n".join(lines)
-        await interaction.followup.send(f"🏆 Final Rankings:\n{board}")
+            board = "\n".join(lines)
+            await interaction.followup.send(f"🏆 Final Rankings:\n{board}")
 
 bot = SprintBot()
 
