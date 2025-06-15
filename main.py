@@ -51,12 +51,12 @@ class SprintBot(commands.Bot):
         except Exception as e:
             print(f"Error syncing commands: {e}")
                 
-        async def on_submit(modal_self, interaction2: discord.Interaction):
-                    try:
-                        sprint_minutes = int(modal_self.minutes.value)
-                    except ValueError:
-                        await interaction2.response.send_message("Please enter a valid number.", ephemeral=True)
-                        return
+    async def on_submit(modal_self, interaction2: discord.Interaction):
+        try:
+            sprint_minutes = int(modal_self.minutes.value)
+        except ValueError:
+            await interaction2.response.send_message("Please enter a valid number.", ephemeral=True)
+            return
 
                     await interaction2.response.send_message(
                         "🪶 Your quills should be poised before the timer starts ticking. Join now and submit your starting word count. You have exactly 3 minutes before we begin.",
