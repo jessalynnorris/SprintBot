@@ -91,8 +91,6 @@ class SprintBot(commands.Bot):
 
                     await self.send_results(interaction2)
 
-    await interaction.response.send_modal(SprintLengthModal())
-
     async def send_results(self, interaction):
         results = []
         non_submitters = []
