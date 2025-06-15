@@ -111,8 +111,6 @@ class SprintBot(commands.Bot):
         board = "\n".join(lines)
         await interaction.followup.send(f"🏆 Final Rankings:\n{board}")
 
-bot = SprintBot()
-
 class StartView(discord.ui.View):
     def __init__(self, bot):
         super().__init__(timeout=None)
