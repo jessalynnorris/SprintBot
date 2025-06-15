@@ -80,11 +80,10 @@ message2 = await interaction.followup.send(
     "Click to log your final word count below:", view=final_view
 )
 
-await asyncio.sleep(90)
 final_view.disable_all()
 await message2.edit(view=final_view)
 
-                    await self.send_results(interaction2)
+await self.send_results(interaction2)
 
             await interaction.response.send_modal(SprintLengthModal())
 
