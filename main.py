@@ -59,14 +59,13 @@ class SprintBot(commands.Bot):
             return
 
         await interaction2.response.send_message(
-                        "🪶 Your quills should be poised before the timer starts ticking. Join now and submit your starting word count. You have exactly 3 minutes before we begin.",
-                        ephemeral=False
-                    )
+            "🪶 Your quills should be poised before the timer starts ticking...", ephemeral=False
+        )
 
-                    view = StartView(self)
-                    message = await interaction.followup.send(
-                        "Click below to join and input your starting word count:", view=view
-                    )
+        view = StartView(self)
+        message = await interaction.followup.send(
+            "Click below to join and input your starting word count:", view=view
+        )
 
                     await asyncio.sleep(180)
                     view.disable_all()
