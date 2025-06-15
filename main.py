@@ -43,6 +43,14 @@ class SprintBot(commands.Bot):
                     )
                     modal_self.add_item(modal_self.minutes)
 
+    async def on_ready(self):
+        print(f'Bot connected as {self.user}')
+        try:
+            synced = await self.tree.sync()
+            print(f"Synced {len(synced)} command(s)")
+        except Exception as e:
+            print(f"Error syncing commands: {e}")
+                
                 async def on_submit(modal_self, interaction2: discord.Interaction):
                     try:
                         sprint_minutes = int(modal_self.minutes.value)
@@ -195,15 +203,6 @@ class FinalWordModal(discord.ui.Modal, title="Enter Final Word Count"):
                 "start": 0,
                 "final": final
             }
-
-@bot.event
-async def on_ready():
-    print(f'Bot connected as {bot.user}')
-    try:
-        synced = await bot.tree.sync()
-        print(f"Synced {len(synced)} command(s)")
-    except Exception as e:
-        print(f"Error syncing commands: {e}")
 
 async def main():
     async with SprintBot() as bot:
