@@ -52,41 +52,41 @@ class SprintLengthModal(discord.ui.Modal, title="Set Sprint Length"):
             return
 
 
-                    await interaction2.response.send_message(
-                        "🪶 Your quills should be poised before the timer starts ticking. Join now and submit your starting word count. You have exactly 3 minutes before we begin.",
-                        ephemeral=False
-                    )
+        await interaction2.response.send_message(
+            "🪶 Your quills should be poised before the timer starts ticking. Join now and submit your starting word count. You have exactly 3 minutes before we begin.",
+            ephemeral=False
+        )
 
-                    view = StartView(self)
-                    message = await interaction.followup.send(
-                        "Click below to join and input your starting word count:", view=view
-                    )
+        view = StartView(self)
+        message = await interaction.followup.send(
+            "Click below to join and input your starting word count:", view=view
+        )
 
-                    await asyncio.sleep(180)
-                    view.disable_all()
-                    await message.edit(view=view)
+        await asyncio.sleep(180)
+        view.disable_all()
+        await message.edit(view=view)
 
-                    await interaction2.followup.send(
-                        f"⏰ Sprint begins now. Impress me, if you think you can.\n({sprint_minutes} minutes on the clock.)"
-                    )
+        await interaction2.followup.send(
+            f"⏰ Sprint begins now. Impress me, if you think you can.\n({sprint_minutes} minutes on the clock.)"
+        )
 
-                    for remaining in range(sprint_minutes * 60, 0, -60):
-                        await asyncio.sleep(60)
+        for remaining in range(sprint_minutes * 60, 0, -60):
+            await asyncio.sleep(60)
 
-                    await interaction2.followup.send("🛎️ Time’s up! Quills down — it’s time to see what you achieved.")
+        await interaction2.followup.send("🛎️ Time’s up! Quills down — it’s time to see what you achieved.")
 
-                    final_view = FinalCountView(self)
-                    message2 = await interaction.followup.send(
-                        "Click to log your final word count below:", view=final_view
-                    )
+        final_view = FinalCountView(self)
+        message2 = await interaction.followup.send(
+            "Click to log your final word count below:", view=final_view
+        )
 
-                    await asyncio.sleep(90)
-                    final_view.disable_all()
-                    await message2.edit(view=final_view)
+        await asyncio.sleep(90)
+        final_view.disable_all()
+        await message2.edit(view=final_view)
 
-                    await self.send_results(interaction2)
+        await self.send_results(interaction2)
 
-            await interaction.response.send_modal(SprintLengthModal())
+    await interaction.response.send_modal(SprintLengthModal())
 
     async def send_results(self, interaction):
         results = []
