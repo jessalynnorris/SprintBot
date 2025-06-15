@@ -1,4 +1,3 @@
-from keep_alive import keep_alive
 import discord
 from discord.ext import commands, tasks
 from discord import app_commands
@@ -16,6 +15,7 @@ intents.members = True
 class SprintBot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix="!", intents=intents)
+        self.tree = app_commands.CommandTree(self)
         self.sprint_data = {}
         self.roasts = [
             "Did you forget we were sprinting? Honestly.",
@@ -34,30 +34,60 @@ class SprintBot(commands.Bot):
         @self.tree.command(name="sprintstart", description="Start a writing sprint")
         async def sprintstart(interaction: discord.Interaction):
             self.sprint_data.clear()
-            await interaction.response.send_message(
-                "🪶 Your quills should be poised before the timer starts ticking. Join now and submit your starting word count. You have exactly 3 minutes before we begin.",
-                ephemeral=False
-            )
 
-            view = StartView(self)
-            await interaction.followup.send("Click below to join and input your starting word count:", view=view)
+            class SprintLengthModal(discord.ui.Modal, title="Set Sprint Length"):
+                def __init__(self):
+                    super().__init__()
+                    self.minutes = discord.ui.TextInput(
+                        label="Sprint length (in minutes)",
+                        placeholder="e.g., 15",
+                        required=True
+                    )
+                    self.add_item(self.minutes)
 
-            await asyncio.sleep(180)
-            view.disable_all()
-            await interaction.followup.send("⏰ Sprint begins now. Impress me, if you think you can.")
+                async def on_submit(modal_self, interaction2: discord.Interaction):
+                    try:
+                        sprint_minutes = int(modal_self.minutes.value)
+                    except ValueError:
+                        await interaction2.response.send_message("Please enter a valid number.", ephemeral=True)
+                        return
 
-            # Start countdown (replace 15 with your sprint length)
-            sprint_minutes = 15
-            for remaining in range(sprint_minutes * 60, 0, -60):
-                await asyncio.sleep(60)
-            await interaction.followup.send("🛎️ Time’s up! Quills down — it’s time to see what you achieved.")
+                    await interaction2.response.send_message(
+                        "🪶 Your quills should be poised before the timer starts ticking. Join now and submit your starting word count. You have exactly 3 minutes before we begin.",
+                        ephemeral=False
+                    )
 
-            final_view = FinalCountView(self)
-            await interaction.followup.send("Click to log your final word count below:", view=final_view)
+                    view = StartView(self)
+                    sprint_message = await interaction2.followup.send(
+                        "Click below to join and input your starting word count:", 
+                        view=view
+                    )
 
-            await asyncio.sleep(90)
-            final_view.disable_all()
-            await self.send_results(interaction)
+                    await asyncio.sleep(180)
+
+                    view.disable_all()
+                    await sprint_message.edit(view=None)
+
+                    await interaction2.followup.send(
+                        f"⏰ Sprint begins now. Impress me, if you think you can.\n({sprint_minutes} minutes on the clock.)"
+                    )
+
+                    for remaining in range(sprint_minutes * 60, 0, -60):
+                        await asyncio.sleep(60)
+
+                    await interaction2.followup.send("🛎️ Time’s up! Quills down — it’s time to see what you achieved.")
+
+                    final_view = FinalCountView(self)
+                    final_message = await interaction2.followup.send(
+                        "Click to log your final word count below:", view=final_view
+                    )
+
+                    await asyncio.sleep(90)
+                    final_view.disable_all()
+                    await final_message.edit(view=None)
+                    await self.send_results(interaction2)
+
+            await interaction.response.send_modal(SprintLengthModal())
 
     async def send_results(self, interaction):
         results = []
@@ -170,8 +200,6 @@ class FinalWordModal(discord.ui.Modal, title="Enter Final Word Count"):
             f"{self.user.mention} has submitted a final count of {final:,}. The full board will be displayed in 90 seconds.",
             ephemeral=False
         )
-
-keep_alive()
 
 @bot.event
 async def on_ready():
