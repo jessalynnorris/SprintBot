@@ -14,7 +14,6 @@ intents.members = True
 class SprintBot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix="!", intents=intents)
-        self.setup_hook_task = self.loop.create_task(self.setup_hook())
         self.sprint_data = {}
         self.roasts = [
             "Did you forget we were sprinting? Honestly.",
