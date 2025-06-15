@@ -66,17 +66,16 @@ await asyncio.sleep(180)
 view.disable_all()
 await message.edit(view=view)
 
+await interaction2.followup.send(
+    f"⏰ Sprint begins now. Impress me, if you think you can.\n({sprint_minutes} minutes on the clock.)"
+)
 
-                    await interaction2.followup.send(
-                        f"⏰ Sprint begins now. Impress me, if you think you can.\n({sprint_minutes} minutes on the clock.)"
-                    )
+for remaining in range(sprint_minutes * 60, 0, -60):
+    await asyncio.sleep(60)
 
-                    for remaining in range(sprint_minutes * 60, 0, -60):
-                        await asyncio.sleep(60)
+await interaction2.followup.send("🛎️ Time’s up! Quills down — it’s time to see what you achieved.")
 
-                    await interaction2.followup.send("🛎️ Time’s up! Quills down — it’s time to see what you achieved.")
-
-                    final_view = FinalCountView(self)
+final_view = FinalCountView(self)
 message2 = await interaction.followup.send(
     "Click to log your final word count below:", view=final_view
 )
