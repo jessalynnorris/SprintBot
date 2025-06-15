@@ -173,4 +173,13 @@ class FinalWordModal(discord.ui.Modal, title="Enter Final Word Count"):
 
 keep_alive()
 
+@bot.event
+async def on_ready():
+    print(f'{bot.user} is online and ready to sprint!')
+    try:
+        synced = await bot.tree.sync()
+        print(f'Synced {len(synced)} command(s)')
+    except Exception as e:
+        print(f'Error syncing commands: {e}')
+
 bot.run(TOKEN)
