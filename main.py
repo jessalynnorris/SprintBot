@@ -58,7 +58,7 @@ class SprintBot(commands.Bot):
             await interaction2.response.send_message("Please enter a valid number.", ephemeral=True)
             return
 
-                    await interaction2.response.send_message(
+        await interaction2.response.send_message(
                         "🪶 Your quills should be poised before the timer starts ticking. Join now and submit your starting word count. You have exactly 3 minutes before we begin.",
                         ephemeral=False
                     )
