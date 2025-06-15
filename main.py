@@ -16,7 +16,6 @@ intents.members = True
 class SprintBot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix="!", intents=intents)
-        self.tree = app_commands.CommandTree(self)
         self.sprint_data = {}
         self.roasts = [
             "Did you forget we were sprinting? Honestly.",
