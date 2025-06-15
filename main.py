@@ -1,202 +1,30 @@
 import discord
 from discord.ext import commands
-import asyncio
 import os
-import random
+import asyncio
 
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 intents = discord.Intents.default()
 intents.message_content = True
 intents.guilds = True
-intents.members = True
 
 class SprintBot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix="!", intents=intents)
-        self.sprint_data = {}
-        self.roasts = [
-            "Did you forget we were sprinting? Honestly.",
-            "You had one job. Submit your words. That’s it.",
-            "Some of us take this seriously, you know.",
-            "Next time, maybe try showing up *and* finishing.",
-            "I suppose deadlines are more of a suggestion to you?",
-            "Are we even surprised? No. No, we are not.",
-            "The library is quieter than your keyboard was.",
-            "Remarkable. Truly. A sprint ghost. Write that story next.",
-            "If vanishing were a skill, you'd have won.",
-            "Incredible. Your invisibility spell worked perfectly."
-        ]
 
-async def setup_hook(self):
-    @self.tree.command(name="sprintstart", description="Start a writing sprint")
-    async def sprintstart(interaction: discord.Interaction):
-        self.sprint_data.clear()
+    async def setup_hook(self):
+        @self.tree.command(name="sprintstart", description="Start a writing sprint")
+        async def sprintstart(interaction: discord.Interaction):
+            await interaction.response.send_message("✅ Bot is alive and received your sprint command.")
 
-        class SprintLengthModal(discord.ui.Modal, title="Set Sprint Length"):
-            def __init__(modal_self):
-                super().__init__()
-                modal_self.minutes = discord.ui.TextInput(
-                    label="Sprint length (in minutes)",
-                    placeholder="e.g., 15",
-                    required=True
-                )
-                modal_self.add_item(modal_self.minutes)
-
-            async def on_submit(modal_self, interaction2: discord.Interaction):
-                try:
-                    sprint_minutes = int(modal_self.minutes.value)
-                except ValueError:
-                    await interaction2.response.send_message("Please enter a valid number.", ephemeral=True)
-                    return
-
-                await interaction2.response.send_message(
-                    "🪶 Your quills should be poised before the timer starts ticking. Join now and submit your starting word count. You have exactly 3 minutes before we begin.",
-                    ephemeral=False
-                )
-
-                view = StartView(self)
-                message = await interaction.followup.send(
-                    "Click below to join and input your starting word count:", view=view
-                )
-
-                await asyncio.sleep(180)
-                view.disable_all()
-                await message.edit(view=view)
-
-                countdown_message = await interaction2.followup.send(
-                    f"⏰ Sprint begins now. Impress me, if you think you can.\n({sprint_minutes} minutes on the clock.)"
-                )
-
-                for remaining in range(sprint_minutes - 1, -1, -1):
-                    await asyncio.sleep(60)
-                    if remaining > 0:
-                        await countdown_message.edit(
-                            content=f"⏳ {remaining} minute{'s' if remaining != 1 else ''} remaining..."
-                        )
-                    else:
-                        await countdown_message.edit(
-                            content="🛎️ Time’s up! Quills down — it’s time to see what you achieved."
-                        )
-                        self.sprint_data["sprint_end_time"] = asyncio.get_event_loop().time()
-
-                final_view = FinalCountView(self)
-                message2 = await interaction.followup.send(
-                    "Click to log your final word count below:", view=final_view
-                )
-
-                await asyncio.sleep(90)
-                final_view.disable_all()
-                await message2.edit(view=final_view)
-
-                await self.send_results(interaction2)
-
-        await interaction.response.send_modal(SprintLengthModal())
-
-    async def send_results(self, interaction):
-        results = []
-        non_submitters = []
-
-        for user_id, data in self.sprint_data.items():
-            if "final" in data:
-                results.append((data["user"], data["final"] - data["start"]))
-            else:
-                non_submitters.append(data["user"])
-
-        results.sort(key=lambda x: x[1], reverse=True)
-
-        lines = [f"**{user.mention}**: {words} words" for user, words in results]
-        for user in non_submitters:
-            roast = random.choice(self.roasts)
-            lines.append(f"**{user.mention}**: didn’t bother submitting. {roast}")
-
-        board = "\n".join(lines)
-        await interaction.followup.send(f"🏆 Final Rankings:\n{board}")
-
-class StartView(discord.ui.View):
-    def __init__(self, bot):
-        super().__init__(timeout=None)
-        self.bot = bot
-
-    @discord.ui.button(label="Join Sprint", style=discord.ButtonStyle.success)
-    async def join(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_modal(StartingWordModal(self.bot, interaction.user))
-
-    def disable_all(self):
-        for child in self.children:
-            child.disabled = True
-
-class FinalCountView(discord.ui.View):
-    def __init__(self, bot):
-        super().__init__(timeout=None)
-        self.bot = bot
-
-    @discord.ui.button(label="Submit Final Count", style=discord.ButtonStyle.primary)
-    async def submit(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.send_modal(FinalWordModal(self.bot, interaction.user))
-
-    def disable_all(self):
-        for child in self.children:
-            child.disabled = True
-
-class StartingWordModal(discord.ui.Modal, title="Enter Starting Word Count"):
-    def __init__(self, bot, user):
-        super().__init__()
-        self.bot = bot
-        self.user = user
-
-        self.word_count = discord.ui.TextInput(
-            label="Starting word count",
-            placeholder="e.g., 12000",
-            required=True
-        )
-        self.add_item(self.word_count)
-
-    async def on_submit(self, interaction: discord.Interaction):
+    async def on_ready(self):
+        print(f"Bot is ready as {self.user}")
         try:
-            count = int(self.word_count.value.replace(",", ""))
-        except ValueError:
-            await interaction.response.send_message("Please enter a valid number.", ephemeral=True)
-            return
-
-        self.bot.sprint_data[self.user.id] = {
-            "user": self.user,
-            "start": count
-        }
-
-        await interaction.response.send_message(
-            f"Starting at {count} words, {self.user.mention} joins the sprint. Let’s hope they understand priorities.",
-            ephemeral=False
-        )
-
-class FinalWordModal(discord.ui.Modal, title="Enter Final Word Count"):
-    def __init__(self, bot, user):
-        super().__init__()
-        self.bot = bot
-        self.user = user
-
-        self.word_count = discord.ui.TextInput(
-            label="Final word count",
-            placeholder="e.g., 12345",
-            required=True
-        )
-        self.add_item(self.word_count)
-
-    async def on_submit(self, interaction: discord.Interaction):
-        try:
-            final = int(self.word_count.value.replace(",", ""))
-        except ValueError:
-            await interaction.response.send_message("Please enter a valid number.", ephemeral=True)
-            return
-
-        if self.user.id in self.bot.sprint_data:
-            self.bot.sprint_data[self.user.id]["final"] = final
-        else:
-            self.bot.sprint_data[self.user.id] = {
-                "user": self.user,
-                "start": 0,
-                "final": final
-            }
+            synced = await self.tree.sync()
+            print(f"Synced {len(synced)} commands.")
+        except Exception as e:
+            print(f"Error syncing commands: {e}")
 
 async def main():
     async with SprintBot() as bot:
