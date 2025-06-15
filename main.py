@@ -64,36 +64,32 @@ class SprintBot(commands.Bot):
                     view.disable_all()
                     await message.edit(view=view)
 
-                    await interaction2.followup.send(
+                    countdown_message = await interaction2.followup.send(
                         f"⏰ Sprint begins now. Impress me, if you think you can.\n({sprint_minutes} minutes on the clock.)"
                     )
 
-countdown_message = await interaction2.followup.send(
-    f"⏰ Sprint begins now. Impress me, if you think you can.\n({sprint_minutes} minutes on the clock.)"
-)
+                    for remaining in range(sprint_minutes - 1, -1, -1):
+                        await asyncio.sleep(60)
+                        if remaining > 0:
+                            await countdown_message.edit(
+                                content=f"⏳ {remaining} minute{'s' if remaining != 1 else ''} remaining..."
+                            )
+                        else:
+                            await countdown_message.edit(
+                                content="🛎️ Time’s up! Quills down — it’s time to see what you achieved."
+                            )
+                            self.sprint_data["sprint_end_time"] = asyncio.get_event_loop().time()
 
-        for remaining in range(sprint_minutes - 1, -1, -1):
-            await asyncio.sleep(60)
-            if remaining > 0:
-                await countdown_message.edit(
-                    content=f"⏳ {remaining} minute{'s' if remaining != 1 else ''} remaining..."
-                )
-            else:
-                await countdown_message.edit(
-                    content="🛎️ Time’s up! Quills down — it’s time to see what you achieved."
-                )
-                self.sprint_data["sprint_end_time"] = asyncio.get_event_loop().time()
+                    final_view = FinalCountView(self)
+                    message2 = await interaction.followup.send(
+                        "Click to log your final word count below:", view=final_view
+                    )
 
-        final_view = FinalCountView(self)
-        message2 = await interaction.followup.send(
-            "Click to log your final word count below:", view=final_view
-        )
+                    await asyncio.sleep(90)
+                    final_view.disable_all()
+                    await message2.edit(view=final_view)
 
-        await asyncio.sleep(90)
-        final_view.disable_all()
-        await message2.edit(view=final_view)
-
-        await self.send_results(interaction2)
+                    await self.send_results(interaction2)
 
     await interaction.response.send_modal(SprintLengthModal())
 
