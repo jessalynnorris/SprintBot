@@ -29,6 +29,7 @@ class SprintBot(commands.Bot):
             "Incredible. Your invisibility spell worked perfectly."
         ]
 
+    async def setup_hook(self):
         @self.tree.command(name="sprintstart", description="Start a writing sprint")
         async def sprintstart(interaction: discord.Interaction):
             self.sprint_data.clear()
