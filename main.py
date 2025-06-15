@@ -68,10 +68,15 @@ class SprintBot(commands.Bot):
                         f"⏰ Sprint begins now. Impress me, if you think you can.\n({sprint_minutes} minutes on the clock.)"
                     )
 
-                    for remaining in range(sprint_minutes * 60, 0, -60):
-                        await asyncio.sleep(60)
+countdown_message = await interaction2.followup.send(f"⏳ {sprint_minutes} minutes remaining...")
 
-                    await interaction2.followup.send("🛎️ Time’s up! Quills down — it’s time to see what you achieved.")
+for remaining in range(sprint_minutes - 1, -1, -1):
+    await asyncio.sleep(60)
+    if remaining > 0:
+        await countdown_message.edit(content=f"⏳ {remaining} minute{'s' if remaining != 1 else ''} remaining...")
+    else:
+        await countdown_message.edit(content="🛎️ Time’s up! Quills down — it’s time to see what you achieved.")
+        self.sprint_data["sprint_end_time"] = asyncio.get_event_loop().time()
 
                     final_view = FinalCountView(self)
                     message2 = await interaction.followup.send(
@@ -193,10 +198,14 @@ class FinalWordModal(discord.ui.Modal, title="Enter Final Word Count"):
                 "final": final
             }
 
-        await interaction.response.send_message(
-            f"{self.user.mention} has submitted a final count of {final:,}. The full board will be displayed in 90 seconds.",
-            ephemeral=False
-        )
+now = asyncio.get_event_loop().time()
+time_elapsed = int(now - self.bot.sprint_data.get("sprint_end_time", now))
+seconds_left = max(0, 90 - time_elapsed)
+
+await interaction.response.send_message(
+    f"{self.user.mention} has submitted a final count of {final:,}. The full board will be displayed in {seconds_left} seconds.",
+    ephemeral=False
+)
 
 @bot.event
 async def on_ready():
