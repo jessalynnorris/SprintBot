@@ -219,4 +219,4 @@ async def on_ready():
 
 print("✅ setup_hook called!")
 
-bot.run(TOKEN)
+asyncio.run(bot.start(TOKEN))
