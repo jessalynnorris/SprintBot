@@ -18,10 +18,8 @@ tree = bot.tree
 
 @tree.command(name="sprintstart", description="Start a writing sprint")
 async def sprintstart(interaction: discord.Interaction):
-    await interaction.response.send_message(
-        "✅ Bot is alive and received your sprint command.\nClick below to join the sprint.",
-        view=StartView(bot)
-    )
+    await interaction.response.defer()  # Prevents "application did not respond"
+    await interaction.followup.send("✅ Sprint command received. Preparing modal...")
 
     async def on_ready(self):
         print(f"Bot is ready as {self.user}")
