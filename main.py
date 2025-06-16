@@ -3,18 +3,18 @@ from discord.ext import commands
 import os
 import asyncio
 
-TOKEN = os.getenv("DISCORD_TOKEN")
-
 intents = discord.Intents.default()
 intents.message_content = True
 intents.guilds = True
 
-bot = SprintBot()
-tree = bot.tree
+TOKEN = os.getenv("DISCORD_TOKEN")
 
 class SprintBot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix="!", intents=intents)
+
+bot = SprintBot()
+tree = bot.tree
 
 @tree.command(name="sprintstart", description="Start a writing sprint")
 async def sprintstart(interaction: discord.Interaction):
