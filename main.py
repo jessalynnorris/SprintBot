@@ -9,6 +9,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.guilds = True
 
+bot = SprintBot()
 tree = bot.tree
 
 class SprintBot(commands.Bot):
@@ -74,3 +75,9 @@ class StartingWordModal(discord.ui.Modal, title="Enter Starting Word Count"):
             f"Starting at {count} words, {self.user.mention} joins the sprint. Let’s hope they understand priorities.",
             ephemeral=False
         )
+
+async def main():
+    async with bot:
+        await bot.start(TOKEN)
+
+asyncio.run(main())
