@@ -9,6 +9,8 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.guilds = True
 
+tree = bot.tree
+
 class SprintBot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix="!", intents=intents)
